@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Penyimpanan Data</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <style>
+        body {
+    font-family: Arial, sans-serif;
+    text-align: center;
+    margin-top: 50px;
+}
+
+#dataForm {
+    display: flex;
+    justify-content: center; /* Pusatkan secara horizontal */
+    align-items: center;    /* Pusatkan secara vertikal */
+    height: 5vh;  
+}
+
+form {
+    margin-bottom: 20px;
+}
+
+input[type="text"] {
+    padding: 20px;
+    width: 200px;
+    margin-right: 20px;
+}
+
+a {
+    display: inline-block;
+    padding: 8px 12px;
+    cursor: pointer;
+    text-decoration: none;
+    color: #fff;
+    background-color: #007bff;
+    border-radius: 5px;
+    margin: 5px;
+}
+
+a:hover {
+    background-color: #0056b3;
+}
+
+#dataList {
+    margin-top: 20px;
+}
+
+.data-item {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 10px;
+    border-bottom: 1px solid #000000;
+}
+
+.urlInput {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 10px;
+    border-bottom: 1px solid #ddd;
+}
+
+.data-item p {
+    margin: 0;
+    flex-grow: 1;
+}
+
+a.edit, a.delete {
+    padding: 5px 10px;
+    margin-left: 5px;
+    color: #fff;
+    border-radius: 3px;
+}
+
+a.edit {
+    background-color: #28a745;
+}
+
+a.delete {
+    background-color: #dc3545;
+}
+
+    </style>
+    <h1>Penyimpanan data</h1>
+
+    <!-- Form untuk menambah atau mengedit data -->
+    <form id="dataForm">
+        <input type="hidden" id="dataIndex" value="">
+        <label for="dataInput">Masukkan Data:</label>
+        <input type="text" id="dataInput" placeholder="Teks data" required>
+
+        <label for="urlInput">Masukkan Link URL:</label>
+        <input type="url" id="urlInput" placeholder="https://contoh.com" required>
+        
+        <!-- Link untuk menyimpan data -->
+        <a href="#" id="saveLink">Simpan</a>
+    </form>
+
+    <!-- Link untuk mengunduh data sebagai file JSON -->
+    <a href="#" id="downloadLink" download="data.Excel">Unduh Data</a>
+    <!-- Link untuk menghapus semua data -->
+    <a href="#" id="clearLink">Hapus Semua Data</a>
+
+    <!-- Tempat untuk menampilkan daftar data -->
+    <div id="dataList"></div>
+
+    <script>
+       // Mendapatkan elemen-elemen dari HTML
+const saveLink = document.getElementById('saveLink');
+const downloadLink = document.getElementById('downloadLink');
+const dataInput = document.getElementById('dataInput');
+const urlInput = document.getElementById('urlInput');
+const dataList = document.getElementById('dataList');
+const dataIndex = document.getElementById('dataIndex');
+
+// Fungsi untuk menyimpan data ke localStorage
+function saveData() {
+    const dataArray = JSON.parse(localStorage.getItem('dataArray')) || [];
+    const index = dataIndex.value;
+
+    const dataObject = {
+        text: dataInput.value,
+        url: urlInput.value
+    };
+
+    if (index) {
+        // Update data yang ada
+        dataArray[index] = dataObject;
+        dataIndex.value = ''; 
+    } else {
+        // Tambahkan data baru
+        dataArray.push(dataObject);
+    }
+
+    localStorage.setItem('dataArray', JSON.stringify(dataArray));
+    dataInput.value = ''; 
+    urlInput.value = ''; 
+    displayData(); 
+}
+
+// Fungsi untuk menampilkan data dari localStorage
+function displayData() {
+    const dataArray = JSON.parse(localStorage.getItem('dataArray')) || [];
+    dataList.innerHTML = '';
+
+    dataArray.forEach((item, index) => {
+        const dataItem = document.createElement('div');
+        dataItem.className = 'data-item';
+
+        const dataText = document.createElement('p');
+        dataText.textContent = item.text;
+
+        const dataLink = document.createElement('a');
+        dataLink.href = item.url;
+        dataLink.textContent = "Link URL";
+        dataLink.target = "_blank"; // Membuka link di tab baru
+        dataLink.className = 'data-url';
+
+        const editLink = document.createElement('a');
+        editLink.textContent = 'Edit';
+        editLink.href = '#';
+        editLink.className = 'edit';
+        editLink.addEventListener('click', (event) => {
+            event.preventDefault();
+            editData(index);
+        });
+
+        const deleteLink = document.createElement('a');
+        deleteLink.textContent = 'Delete';
+        deleteLink.href = '#';
+        deleteLink.className = 'delete';
+        deleteLink.addEventListener('click', (event) => {
+            event.preventDefault();
+            deleteData(index);
+        });
+
+        dataItem.appendChild(dataText);
+        dataItem.appendChild(dataLink);
+        dataItem.appendChild(editLink);
+        dataItem.appendChild(deleteLink);
+
+        dataList.appendChild(dataItem);
+    });
+}
+
+// Fungsi untuk mengedit data
+function editData(index) {
+    const dataArray = JSON.parse(localStorage.getItem('dataArray'));
+    dataInput.value = dataArray[index].text;
+    urlInput.value = dataArray[index].url;
+    dataIndex.value = index; 
+    localStorage.setItem('dataArray', dataArray);
+}
+
+// Fungsi untuk menghapus data
+function deleteData(index) {
+    const dataArray = JSON.parse(localStorage.getItem('dataArray'));
+    dataArray.splice(index, 1); 
+    localStorage.setItem('dataArray', JSON.stringify(dataArray));
+    displayData();
+}
+
+// Fungsi untuk mengunduh data sebagai file JSON
+function downloadData() {
+    const dataArray = JSON.parse(localStorage.getItem('dataArray')) || [];
+    const dataStr = JSON.stringify(dataArray, null, 2);
+    const blob = new Blob([dataStr], { type: "application/Excel" });
+    const url = URL.createObjectURL(blob);
+
+    downloadLink.href = url;
+}
+
+// Fungsi untuk menghapus semua data dari localStorage
+function clearData() {
+    localStorage.removeItem('dataArray'); 
+    displayData(); 
+    localStorage.removeItem('dataArray');
+}
+
+// Event listeners
+saveLink.addEventListener('click', (event) => {
+    event.preventDefault(); 
+    saveData(); 
+});
+
+downloadLink.addEventListener('click', (event) => {
+    downloadData(); 
+});
+
+document.getElementById('clearLink').addEventListener('click', (event) => {
+    event.preventDefault();
+    clearData(); 
+});
+
+// Tampilkan data saat pertama kali load
+displayData();
+
+    </script>
+</body>
+</html>
