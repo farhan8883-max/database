@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aplikasi Penyimpanan Data dengan Local Storage</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <style>
+    body {
+    font-family: Arial, sans-serif;
+    max-width: 500px;
+    margin: 0 auto;
+    padding: 20px;
+    background: url(2c17044f-f2a2-4ad6-9ce0-b02fec4066b5.jpeg);
+}
+
+h1 {
+    font-family: Georgia, 'Times New Roman', Times, serif;
+    text-align: center;
+    color: #000000;
+}
+
+label {
+    color: #000000;
+}
+
+span {
+    color: #000000;
+}
+
+form {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+#noteInput {
+    flex: 1;
+    padding: 8px;
+}
+
+button {
+    border-radius: 3em;
+    padding: 10px;
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    cursor: pointer;
+}
+
+button:hover {
+    background-color: #0056b3;
+}
+
+#noteList .note-item {
+    background: #fff;
+    margin: 2em;
+    padding: 10px;
+    margin-bottom: 10px;
+    border-radius: 5px;
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+    background-color: #ffffff;
+    text-decoration: none;
+}
+
+.note-item a {
+    color: #000000;
+    background-color: rgb(255, 221, 0);
+    padding: 5px;
+    border-radius: 1em;
+    margin: 3px;
+}
+
+.note-actions {
+    display: flex;
+    gap: 5px;
+}
+
+.note-actions a {
+    cursor: pointer;
+    color: #000000;
+    text-decoration: none;
+}
+
+.note-actions a:hover {
+    text-decoration: none;
+    background-color: green;
+}
+
+#clearAll{
+    background-color: red;
+}
+
+#clearAll:hover{
+    background-color: rgb(201, 23, 23);
+}
+
+.farhan{
+    background: url(Cute\ Business\ Paper\ Background\ Wallpaper\ Image\ For\ Free\ Download\ -\ Pngtree\ \(1\).jpeg);
+    padding: 3em;
+}
+
+    </style>
+    <div class="farhan">
+        <h1>Catatan Harian</h1>
+
+        <!-- Form untuk menambah atau mengedit catatan -->
+        <form id="noteForm">
+          <input type="hidden" id="noteIndex">
+          <label for="noteInput">Note:</label>
+          <input type="text" id="noteInput" placeholder="Tulis catatan di sini..." required>
+          <button type="submit">Send</button>
+        </form>
+
+        <!-- Tombol untuk menghapus semua catatan -->
+        <button id="clearAll">Delete All</button>
+
+        <!-- Tempat untuk menampilkan daftar catatan -->
+        <div id="noteList"></div>
+    </div>
+    
+
+    <script>
+        // Mendapatkan elemen dari HTML
+const noteForm = document.getElementById('noteForm');
+const noteInput = document.getElementById('noteInput');
+const noteList = document.getElementById('noteList');
+const noteIndex = document.getElementById('noteIndex');
+const clearAllButton = document.getElementById('clearAll');
+
+// Fungsi untuk menampilkan data dari localStorage
+function displayNotes() {
+    const notes = JSON.parse(localStorage.getItem('notes')) || [];
+    noteList.innerHTML = '';
+
+    notes.forEach((note, index) => {
+        const noteItem = document.createElement('div');
+        noteItem.className = 'note-item';
+
+        const noteText = document.createElement('span');
+        noteText.textContent = note;
+
+        const actions = document.createElement('div');
+        actions.className = 'note-actions';
+
+        const editLink = document.createElement('a');
+        editLink.textContent = 'Edit';
+        editLink.addEventListener('click', () => editNote(index));
+
+        const deleteLink = document.createElement('a');
+        deleteLink.textContent = 'Delete';
+        deleteLink.addEventListener('click', () => deleteNote(index));
+
+        actions.appendChild(editLink);
+        actions.appendChild(deleteLink);
+
+        noteItem.appendChild(noteText);
+        noteItem.appendChild(actions);
+        noteList.appendChild(noteItem);
+    });
+}
+
+// Fungsi untuk menyimpan catatan ke localStorage
+function saveNote() {
+    const notes = JSON.parse(localStorage.getItem('notes')) || [];
+    const index = noteIndex.value;
+
+    if (index) {
+        notes[index] = noteInput.value; // Update catatan
+    } else {
+        notes.push(noteInput.value); // Tambah catatan baru
+    }
+
+    localStorage.setItem('notes', JSON.stringify(notes));
+    noteInput.value = '';
+    noteIndex.value = '';
+    displayNotes();
+}
+
+// Fungsi untuk mengedit catatan
+function editNote(index) {
+    const notes = JSON.parse(localStorage.getItem('notes'));
+    noteInput.value = notes[index];
+    noteIndex.value = index;
+}
+
+// Fungsi untuk menghapus catatan
+function deleteNote(index) {
+    const notes = JSON.parse(localStorage.getItem('notes'));
+    notes.splice(index, 1); // Hapus catatan dari array
+    localStorage.setItem('notes', JSON.stringify(notes));
+    displayNotes();
+}
+
+// Fungsi untuk menghapus semua catatan
+function clearAllNotes() {
+    localStorage.removeItem('notes');
+    displayNotes();
+}
+
+// Event listener untuk form
+noteForm.addEventListener('submit', (event) => {
+    event.preventDefault();
+    saveNote();
+});
+
+// Event listener untuk tombol "Hapus Semua"
+clearAllButton.addEventListener('click', clearAllNotes);
+
+// Tampilkan catatan saat halaman pertama kali dimuat
+displayNotes();
+
+    </script>
+</body>
+</html>
